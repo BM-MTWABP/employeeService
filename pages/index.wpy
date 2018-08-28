@@ -1,15 +1,119 @@
 <style lang="less">
-  .container {
+  page {
+    background: rgba(238, 238, 238, 0.61);
+  }
+  image {
+    width: 100%;
+    height: 100%;
+  }
+  .wrapper {
     button {
       width: 200rpx;
       height: 200rpx;
+    }
+    .listContainer {
+      font-size: 30rpx;
+      padding: 0 20rpx 160rpx;
+      .item {
+        display: flex;
+        padding: 20rpx 26rpx;
+        border: 1rpx solid rgba(250, 141, 38,.3);
+          box-shadow: 5rpx 5rpx 5rpx rgba(211, 210, 208,.5);
+
+        margin-top: 20rpx;
+        border-radius: 15rpx;
+        background: #fff;
+        .avatar {
+          width: 100rpx;
+          height: 100rpx;
+        }
+        .avatar.heating {
+          width: 200rpx;
+          height: 200rpx;
+        }
+        .right {
+          margin-left: 30rpx;
+          .name {
+            margin-top: 10rpx;
+          }
+          .name.heating {
+            font-size: 40rpx;
+          }
+           .name.done {
+            margin-top: 0;
+            
+          }
+          .status {
+            font-size: 26rpx;
+            color: #999;
+          }
+          .status.heating {
+            margin-top: 18rpx;
+            font-size: 30rpx;
+            color: rgb(20, 161, 15)
+          }
+          .startTime {
+            margin-top: 18rpx;
+          }
+          .duration {
+            color: #999;
+          }
+        }
+      }
+      .item.heating {
+        border: 2rpx solid rgba(98, 165, 22, .5);
+      }
+      .item.done {
+        border: 2rpx solid rgba(138, 136, 135, .5);
+        background: rgba(238, 238, 238, 0.61);
+      }
+    }
+    .bottom {
+      position: fixed;
+      bottom: 0;
+      display: flex;
+      color: #fff;
+      width: 750rpx;
+      .start,
+      .end {
+        width: 50%;
+        text-align: center;
+        height: 100rpx;
+        line-height: 100rpx;
+      }
+      .start {
+        background: rgb(250, 141, 38);
+      }
+      .end {
+        background: rgb(255, 94, 0);
+        // background: rgb(169, 89, 185);
+
+      }
     }
   }
 </style>
 
 <template>
-  <view class="container">
-    <button open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="bindGetUserInfo"> </button>
+  <view class="wrapper">
+    <!-- <button open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="bindGetUserInfo"> </button> -->
+    <view class="listContainer">
+      <view class="item {{item.status=='正在热饭'?'heating':''}} {{item.status=='热饭完成'?'done':''}}" wx:for="{{list}}">
+        <view class="avatar {{item.status=='正在热饭'?'heating':''}}">
+          <image src="/imgs/avatar.png" />
+        </view>
+        <view class="right">
+          <view class="name {{item.status=='正在热饭'?'heating':''}} {{item.status=='热饭完成'?'done':''}}">{{item.name}}</view>
+          <view class="status {{item.status=='正在热饭'?'heating':''}}">{{item.status}}</view>
+          <view class="startTime" wx:if="{{item.status=='正在热饭'}}">开始时间：{{item.startTime}}</view>
+          <!-- <view class="endTime" wx:if="{{item.status=='热饭完成'}}">结束时间：11:26</view> -->
+          <view class="duration" wx:if="{{item.status=='热饭完成'}}">{{item.startTime}}-{{item.endTime}}</view>
+        </view>
+      </view>
+    </view>
+    <view class="bottom">
+      <view class="start">开始热饭</view>
+      <view class="end">结束热饭</view>
+    </view>
   </view>
 </template>
 
@@ -17,19 +121,75 @@
   import wepy from 'wepy'
   export default class Index extends wepy.page {
     config = {
-      navigationBarTitleText: 'test'
+      navigationBarTitleText: '热饭咯'
     }
-    components = {
-    }
+    components = {}
     data = {
+      list: [{
+          name: '唧唧复唧唧',
+          status: '热饭完成',
+          startTime: '11:30',
+          endTime: '11:36'
+        },
+        {
+          name: '唧唧复唧唧',
+          status: '热饭完成',
+          startTime: '11:30',
+          endTime: '11:36'
+        }, {
+          name: '唧唧复唧唧',
+          status: '热饭完成',
+          startTime: '11:30',
+          endTime: '11:36'
+        }, {
+          name: '唧唧复唧唧',
+          status: '正在热饭',
+          startTime: '11:30',
+          endTime: '11:36'
+        }, {
+          name: '唧唧复唧唧',
+          status: '正在等待',
+          startTime: '11:30',
+          endTime: '11:36'
+        }, {
+          name: '唧唧复唧唧',
+          status: '正在等待',
+          startTime: '11:30',
+          endTime: '11:36'
+        }, {
+          name: '唧唧复唧唧',
+          status: '正在等待',
+          startTime: '11:30',
+          endTime: '11:36'
+        }, {
+          name: '唧唧复唧唧',
+          status: '正在等待',
+          startTime: '11:30',
+          endTime: '11:36'
+        }, {
+          name: '唧唧复唧唧',
+          status: '正在等待',
+          startTime: '11:30',
+          endTime: '11:36'
+        }, {
+          name: '唧唧复唧唧',
+          status: '正在等待',
+          startTime: '11:30',
+          endTime: '11:36'
+        }, {
+          name: '唧唧复唧唧',
+          status: '正在等待',
+          startTime: '11:30',
+          endTime: '11:36'
+        },
+      ]
     }
     computed = {}
     methods = {
-      bindGetUserInfo(e){
-        console.log(e,29);
+      bindGetUserInfo(e) {
+        console.log(e, 29);
       }
     }
-
     onLoad() {}
   }
 </script>
