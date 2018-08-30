@@ -143,26 +143,43 @@ function uploadFile(data, tryagain, type) {
   });
 }
 
-export default {
-  /**
-   * code 置换登录态 session 接口
-   */
-  login(code) {
+
+ export function login(data) {
     return wepy.request({
-      url: G.apiUrl + '/api/user/login',
+      url: G.apiUrl + '/app/login',
       method: 'POST',
       header: {
-        'content-type': 'application/x-www-form-urlencoded'
+        'content-type': 'application/json'
       },
-      data: {
-        code: code
-      }
+      data
     })
-  },
-  /**
-   * 封装 request 方法，在第一次登录态失效后自动登录并转换 session 后重发请求
-   */
+  }
 
 
-
+ export function getIntoQueue(data) {//加入热饭队列
+  return wepy.request({
+    url: G.apiUrl + '/app/heat',
+    method: 'POST',
+    header: {
+      'content-type': 'application/json'
+    },
+    data
+  })
 }
+
+export function getHeatList(data) {//加入热饭队列
+  return wepy.request({
+    url: G.apiUrl + '/app/heats/'+data,
+    method: 'GET',
+    header: {
+      'content-type': 'application/json'
+    },
+  
+  })
+}
+
+
+
+
+
+

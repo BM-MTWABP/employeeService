@@ -8,8 +8,28 @@
   }
   .wrapper {
     button {
-      width: 200rpx;
-      height: 200rpx;
+      padding: 10rpx 20rpx;
+      width: 300rpx;
+      margin: 0 auto;
+      margin-top: 400rpx;
+      color: #fff;
+      background: #4FAF70;
+    }
+    .zones {
+      display: flex;
+      justify-content: space-around;
+      color: #999;
+      background: #fff;
+      font-size: 30rpx;
+      .zone {
+        width: 200rpx;
+        height: 70rpx;
+        line-height: 70rpx;
+        text-align: center;
+      }
+      .zone-ac {
+        border-bottom: 3px solid rgb(250, 141, 38);
+      }
     }
     .listContainer {
       font-size: 30rpx;
@@ -17,9 +37,8 @@
       .item {
         display: flex;
         padding: 20rpx 26rpx;
-        border: 1rpx solid rgba(250, 141, 38,.3);
-          box-shadow: 5rpx 5rpx 5rpx rgba(211, 210, 208,.5);
-
+        border: 1rpx solid rgba(250, 141, 38, .3);
+        box-shadow: 5rpx 5rpx 5rpx rgba(211, 210, 208, .5);
         margin-top: 20rpx;
         border-radius: 15rpx;
         background: #fff;
@@ -39,9 +58,8 @@
           .name.heating {
             font-size: 40rpx;
           }
-           .name.done {
+          .name.done {
             margin-top: 0;
-            
           }
           .status {
             font-size: 26rpx;
@@ -85,9 +103,17 @@
         background: rgb(250, 141, 38);
       }
       .end {
-        background: rgb(255, 94, 0);
-        // background: rgb(169, 89, 185);
-
+        background: rgb(255, 94, 0); // background: rgb(169, 89, 185);
+      }
+      picker {
+        width: 100%;
+      }
+      .getIntoQueue {
+        width: 100%;
+        text-align: center;
+        height: 100rpx;
+        line-height: 100rpx;
+        background: rgb(247, 190, 3);
       }
     }
   }
@@ -95,101 +121,220 @@
 
 <template>
   <view class="wrapper">
-    <!-- <button open-type="getUserInfo" lang="zh_CN" bindgetuserinfo="bindGetUserInfo"> </button> -->
-    <view class="listContainer">
-      <view class="item {{item.status=='正在热饭'?'heating':''}} {{item.status=='热饭完成'?'done':''}}" wx:for="{{list}}">
-        <view class="avatar {{item.status=='正在热饭'?'heating':''}}">
-          <image src="/imgs/avatar.png" />
+    <button open-type="getUserInfo" lang="zh_CN" wx:if="{{!userInfo.nickName}}" bindgetuserinfo="bindGetUserInfo">点击登录</button>
+    <view class="zones" wx:if="{{userInfo.nickName}}">
+      <view class="zone {{zone=='西区'?'zone-ac':''}}" @tap="showList('西区')">西区</view>
+      <view class="zone {{zone=='东区'?'zone-ac':''}}" @tap="showList('东区')">东区</view>
+    </view>
+    <view class="listContainer" wx:if="{{userInfo.nickName}}">
+      <view class="item {{item.heatStatusName=='heating'?'heating':''}} {{item.heatStatusName=='done'?'done':''}}" wx:for="{{list}}">
+        <view class="avatar {{item.heatStatusName=='heating'?'heating':''}}">
+          <image src="{{item.imgUrl}}" />
         </view>
         <view class="right">
-          <view class="name {{item.status=='正在热饭'?'heating':''}} {{item.status=='热饭完成'?'done':''}}">{{item.name}}</view>
-          <view class="status {{item.status=='正在热饭'?'heating':''}}">{{item.status}}</view>
-          <view class="startTime" wx:if="{{item.status=='正在热饭'}}">开始时间：{{item.startTime}}</view>
-          <!-- <view class="endTime" wx:if="{{item.status=='热饭完成'}}">结束时间：11:26</view> -->
-          <view class="duration" wx:if="{{item.status=='热饭完成'}}">{{item.startTime}}-{{item.endTime}}</view>
+          <view class="name {{item.heatStatusName=='heating'?'heating':''}} {{item.heatStatusName=='done'?'done':''}}">{{item.nickName}}</view>
+          <view class="status {{item.heatStatusName=='heating'?'heating':''}}">{{item.heatStatusName}}</view>
+          <view class="startTime" wx:if="{{item.heatStatusName=='heating'}}">开始时间：{{item.startTime}}</view>
+          <!-- <view class="endTime" wx:if="{{item.heatStatusName=='done'}}">结束时间：11:26</view> -->
+          <view class="duration" wx:if="{{item.heatStatusName=='done'}}">{{item.startTime}}-{{item.endTime}}</view>
         </view>
       </view>
     </view>
-    <view class="bottom">
-      <view class="start">开始热饭</view>
-      <view class="end">结束热饭</view>
+    <view class="bottom" wx:if="{{userInfo.nickName}}">
+      <view class="start" wx:if="{{myStatus=='ready'}}">开始热饭</view>
+      <view class="end" wx:if="{{inQueue}}">结束热饭</view>
+      <picker range="{{zoneList}}" bindchange="getIntoQueue" wx:if="{{myStatus==null||myStatus=='done'}}">
+        <view class="getIntoQueue">加入队列</view>
+      </picker>
     </view>
   </view>
 </template>
 
 <script>
   import wepy from 'wepy'
+  import {
+    login,
+    getIntoQueue,
+    getHeatList
+  } from './../common/api'
   export default class Index extends wepy.page {
     config = {
       navigationBarTitleText: '热饭咯'
     }
     components = {}
     data = {
-      list: [{
-          name: '唧唧复唧唧',
-          status: '热饭完成',
-          startTime: '11:30',
-          endTime: '11:36'
-        },
-        {
-          name: '唧唧复唧唧',
-          status: '热饭完成',
-          startTime: '11:30',
-          endTime: '11:36'
-        }, {
-          name: '唧唧复唧唧',
-          status: '热饭完成',
-          startTime: '11:30',
-          endTime: '11:36'
-        }, {
-          name: '唧唧复唧唧',
-          status: '正在热饭',
-          startTime: '11:30',
-          endTime: '11:36'
-        }, {
-          name: '唧唧复唧唧',
-          status: '正在等待',
-          startTime: '11:30',
-          endTime: '11:36'
-        }, {
-          name: '唧唧复唧唧',
-          status: '正在等待',
-          startTime: '11:30',
-          endTime: '11:36'
-        }, {
-          name: '唧唧复唧唧',
-          status: '正在等待',
-          startTime: '11:30',
-          endTime: '11:36'
-        }, {
-          name: '唧唧复唧唧',
-          status: '正在等待',
-          startTime: '11:30',
-          endTime: '11:36'
-        }, {
-          name: '唧唧复唧唧',
-          status: '正在等待',
-          startTime: '11:30',
-          endTime: '11:36'
-        }, {
-          name: '唧唧复唧唧',
-          status: '正在等待',
-          startTime: '11:30',
-          endTime: '11:36'
-        }, {
-          name: '唧唧复唧唧',
-          status: '正在等待',
-          startTime: '11:30',
-          endTime: '11:36'
-        },
-      ]
+      zoneList: ['西区', '东区'],
+      zone: '西区',
+      myStatus: '',
+      list: [],
+      // list: [{
+      //     name: '唧唧复唧唧',
+      //     status: 'done',
+      //     startTime: '11:30',
+      //     endTime: '11:36'
+      //   },
+      //   {
+      //     name: '唧唧复唧唧',
+      //     status: 'done',
+      //     startTime: '11:30',
+      //     endTime: '11:36'
+      //   }, {
+      //     name: '唧唧复唧唧',
+      //     status: 'done',
+      //     startTime: '11:30',
+      //     endTime: '11:36'
+      //   }, {
+      //     name: '唧唧复唧唧',
+      //     status: 'heating',
+      //     startTime: '11:30',
+      //     endTime: '11:36'
+      //   }, {
+      //     name: '唧唧复唧唧',
+      //     status: 'waiting',
+      //     startTime: '11:30',
+      //     endTime: '11:36'
+      //   }, {
+      //     name: '唧唧复唧唧',
+      //     status: 'waiting',
+      //     startTime: '11:30',
+      //     endTime: '11:36'
+      //   }, {
+      //     name: '唧唧复唧唧',
+      //     status: 'waiting',
+      //     startTime: '11:30',
+      //     endTime: '11:36'
+      //   }, {
+      //     name: '唧唧复唧唧',
+      //     status: 'waiting',
+      //     startTime: '11:30',
+      //     endTime: '11:36'
+      //   }, {
+      //     name: '唧唧复唧唧',
+      //     status: 'waiting',
+      //     startTime: '11:30',
+      //     endTime: '11:36'
+      //   }, {
+      //     name: '唧唧复唧唧',
+      //     status: 'waiting',
+      //     startTime: '11:30',
+      //     endTime: '11:36'
+      //   }, {
+      //     name: '唧唧复唧唧',
+      //     status: 'waiting',
+      //     startTime: '11:30',
+      //     endTime: '11:36'
+      //   },
+      // ],
+      userInfo: {},
+      openId: '',
+      inQueue: false, //是否进入了队列
     }
     computed = {}
     methods = {
-      bindGetUserInfo(e) {
+      async showList(zoneName) {
+        let that = this;
+        console.log(zoneName, that.zone, 236);
+        let res = await getHeatList(zoneName);
+        that.list = res.data.data;
+        that.zone = zoneName;
+        that.$apply();
+      },
+      async bindGetUserInfo(e) {
+        wx.showLoading({
+          title: '加载中',
+        })
+        let that = this;
         console.log(e, 29);
+        that.userInfo = e.detail.userInfo;
+        that.login();
+        let res = await getHeatList('西区')
+        console.log(res, 253);
+        that.list = res.data.data
+        that.$apply();
+      },
+      async getIntoQueue(e) { //加入热饭队列
+        console.log(this.openId, 232);
+        let that = this;
+        let date = new Date();
+        let zoneName = that.zoneList[e.detail.value];
+        console.log(e, 227);
+        that.zone = zoneName;
+        let res = await getIntoQueue({
+          "heatStatus": 0, //0:waiting;1:heating;2:done
+          "openId": that.openId,
+          "waitTime": date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes(),
+          "zone": that.zone
+        })
+        console.log(res, 243);
+        if (res.data.code == 200) {
+          let res = await getHeatList(zoneName);
+          that.list = res.data.data;
+          that.$apply();
+          wx.showToast({
+            title: '成功加入队列',
+            icon: 'success',
+            duration: 1000
+          })
+          that.inQueue = true;
+        } else {
+          wx.showModal({
+            title: '提示',
+            content: res.data.msg
+          })
+        }
+        that.$apply();
       }
     }
     onLoad() {}
+    login() {
+      let that = this;
+      wx.login({
+        success: async function(res) {
+          let res1 = await login({
+            code: res.code,
+            nickName: that.userInfo.nickName,
+            imgUrl: that.userInfo.avatarUrl
+          })
+          console.log(res1, 197);
+          if (res1.data.code == 200) {
+            that.openId = res1.data.data.userStatusVo.openId;
+            // that.myStatus = res1.data.data.userStatusVo.userHeatStatus;
+            switch (res1.data.data.userStatusVo.userHeatStatus) {
+              case 0:
+                that.myStatus = 'waiting'
+                break;
+              case 1:
+                that.myStatus = 'ready'
+                break;
+              case 2:
+                that.myStatus = 'heating'
+                break;
+              case 3:
+                that.myStatus = 'done'
+                break;
+              default:
+                break;
+            }
+            that.$apply();
+            setTimeout(function() {
+              wx.hideLoading()
+            }, 1000)
+            setTimeout(function() {
+              wx.showToast({
+                title: '登录成功',
+                icon: 'success',
+                duration: 1000
+              })
+            }, 1500)
+          } else {
+            wx.showModal({
+              title: '提示',
+              content: res.data.msg,
+              showCancel: false
+            })
+          }
+        }
+      });
+    }
   }
 </script>
